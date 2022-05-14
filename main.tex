@@ -10,15 +10,168 @@
 %! Generated with commit hash: "5d7e6b11019d60d4750675c9a8e8caafb6850e1b"
 %! sha1sum of templateAll.fmt: "dd390d1959f0af285c0c64251268ebcd03631e05"
 %! Repository URL: https://github.com/Emily3403/LaTeXtemplate
-
+\usepackage{microtype}
 \date{}
 \useTemplate[english]
 % TODO: Remove page number
 
+
+% #1 = name, #2 = ingredients (pgffor), #3 = Equipment (pgffor), #4 = Method (pgffor)
+\def\cocktail#1#2#3#4{
+    \begin{center}
+        \bf{#1}
+    \end{center}
+    \textbf{Ingredients:}
+    \begin{itemize}
+        \foreach \x in {#2} {
+            \item \x
+            }
+\end{itemize}
+%
+\vspace{5pt}
+\textbf{Equipment: }%
+\foreach[count=\i] \x in {#3}{\ifnum\i=1\else, \fi\x}%
+%
+\Lf%
+\vspace{3pt}%
+\textbf{Method:}
+\begin{itemize}
+    \foreach \x in {#4} {
+        \item \x
+        }
+\end{itemize}
+%
+\vspace{20pt}
+}
+
 \begin{document}
-A
+\cocktail{The Tipperary}
+{60ml single pot still Irish whiskey, 20ml sweet vermouth, 10ml green Chartreuse, 2 dashes orange bitters, 2 dashes orange bitters}
+%
+{Jigger, Mixing Glass, Julep Strainer, Chilled coupe glass}
+%
+{Prepare your lemon twist., Add all of your ingredients to your mixing glass and fill with ice., Stir with barspoon by placing the back of the spoon against the inside of the glass and pushing the ice around until chilled and diluted.}
 
 
+
+\cocktail{The Treacle}
+{60ml (2oz) dark rum,
+    10ml (1/3oz) demerara sugar syrup,
+    15ml (1/2oz) cloudy apple juice,
+    2 dashes black walnut bitters,
+Orange twist to garnish,}
+%
+{jigger, mixing glass, barspoon, julep strainer, rocks glass, big block of ice}
+%
+{Prep your orange twist.,
+    Add all ingredients except the apple juice to the mixing glass, add plenty of ice and stir until chilled and diluted.,
+    Strain over a big block of ice and float the apple juice on top.,
+Give orange twist a sharp fold over the top to expel oils and drop in to garnish.}
+
+\cocktail{The Scofflaw}{
+    50ml (1 \& 3/4oz) rye whiskey,
+    25ml (3/4oz) dry vermouth,
+    10ml (1/3oz) grenadine,
+    2 dashes of orange bitters,
+    15ml (1/2oz) lemon juice,
+    Lemon twist to garnish,
+    Good ice,
+}
+%
+{coupe glass, jigger, shaker tins, hawthorn strainer, fine strainer}
+%
+{Add all of the ingredients to your shaker tin.,
+    Fill shaker tin full with ice.,
+    Combine tins and shake until the tins become frosted.,
+    Open tins, double strain into a chilled coupe.,
+Squeeze lemon twist to expel the citrus oil over it, add the twist to the drink.}
+
+\cocktail{Rum Monte Sour}{
+    45ml (1 1/2oz) Amaro Montenegro,
+    15ml (1/2oz) dark rum,
+    30ml (1 oz) lemon juice,
+    5ml (1/6oz) sugar syrup,
+    10-15ml egg white,
+    Orange twist to garnish,
+}
+%
+{jigger, shaker tins, hawthorn strainer, fine strainer, rocks glass, large ice block}
+%
+{
+    Add all ingredients to shaker tins, dry shake (without ice) to emulsify – hold tins
+    tightly!,
+    Add ice and shake again, then double strain over good ice in to your rocks glass
+    (using the hawthorn strainer and fine strainer).,
+    Fold twist over the top of the drink to expel the oils, then arrange in glass to
+    garnish.,
+}
+
+
+
+
+\cocktail{Mojito}{
+    60ml (2oz) white rum,
+    20ml (2/3oz) fresh lime juice,
+    20ml (2/3oz) sugar syrup,
+    6 – 8 mint leaves,
+    Top soda water (optional),
+    Crushed ice,
+    Mint sprig to garnish,
+}
+%
+{jigger, barspoon, highball glass, tea towel, wooden mallet/rolling pin, bar
+napkin (unless you’re making it for yourself!)}
+%
+{
+    {Crush your ice if you don’t have a crushed ice machine to hand. Use tea towel and
+    wooden mallet for this (wrap ice in tea towel, then smash)},
+    Add all ingredients to glass and fill with ice to just under top of glass.,
+    {    I don’t muddle – just give the mint a gentle clap – so as to keep the drink
+    lighter and fresher, but if you do, do it gently.},
+    Place barspoon in the glass and cover the top with the bar napkin.,
+    Churn through, add more ice and repeat until the glass is pretty much full and the mint is suspended through the drink.,
+    Top with a cap of crushed ice and some soda water if you like a little spritz.,
+    {Garnish with a mint sprig, and enjoy!},
+}
+
+
+
+\cocktail{}{
+    15ml (1/2oz) vodka,
+    15ml (1/2oz) gin,
+    15ml (1/2oz) white rum,
+    15ml (1/2oz) tequila,
+    15ml (1/2oz) curacao/triple sec,
+    15ml (1/2oz) sugar syrup,
+    30ml fresh lemon juice,
+    Around 45ml coca cola,
+    A skewered lemon wheel and cocktail cherry to garnish,
+}
+%
+{jigger, shaker tins, hawthorn strainer, highball glass}
+%
+{
+    Add all of your ingredients except your coca cola to your shaker tins.,
+    Pour the coca cola in to your serving glass.,
+    Fill your shaker tin with ice, seal and shake hard.,
+    Pop the tins open, but before you pour, add ice to your serving glass.,
+    Use hawthorn strainer to hold the ice back in your tins and pour slowly over fresh ice – this should create a layered effect.,
+    Garnish with your skewered lemon and cherry, and enjoy!
+}
+
+
+
+
+
+%\cocktail{}{
+
+%}
+%
+%{}
+%
+%{
+
+%}
 
 \end{document}
 
