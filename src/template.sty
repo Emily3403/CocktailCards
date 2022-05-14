@@ -1,0 +1,392 @@
+%! This template, or rather these templates, provide a big collection of packages and other utilities,
+%! that may be useful, depending on the use-case. It aims at having everything you *might* need.
+%!
+%! While this approach is fundamentally slow, the pre-compiled format files fix this problem.
+%!
+%! Note:
+%!  All templateX.sty files are expected to be found by the LaTeX compiler in the "main" directory - i.e. in the most upper layer.
+%!  This can be achieved in different ways (Ordered from easiest to hardest):
+%!
+%!      Have the templateX.sty files in the main directory in which you compile.
+%!        → This is the most convenient solution, but (IMHO) the worst. Then your entire main directory will be bloated with useless files.
+%!
+%!      Have the templateX.sty files in the directory `template/` and styles for modules (if you need them) in `template/moduleStyles/`.
+%!        → Then, they will be found automagically and everything will work.
+%!
+%!      Have the templateX.sty files in a custom directory anywhere on your system.
+%!        → You will have to setup either the `TEXINPUTS` environment variable or the \input@path macro.
+%!          You can have a look my redefinition of \input@path for an example on how to use it.
+%!
+%!      Place the templateX.sty files / template directory into the /usr/share/…/latex directory.
+%!        → If you go with this solution you won't have to copy the template every time.
+%!          This sacrifices compatibility for time (and space) savings.
+%!
+%!      For convenience I place the `template.sty` file in the main document folder.
+%!        → This makes the syntax of ↓ easier, as I I can type `\RequirePackage{template}` rather than `\RequirePackage{template/template}`
+%!
+%!
+%!
+%!  Notation:
+%!
+%!      KEY = VALUE
+%!        → Here you have to set a VALUE for the KEY. There is only one option, being VALUE.
+%!
+%!      KEY = …
+%!        → Here some value is expected, but it may be arbitrary. This usually is the case when another package is invoked and the macro passes the options down to that package
+%!          Usually it is accompanied by a reference to that package.
+%!
+%!      KEY = [VALUE1 | VALUE2 | …]
+%!        → Here you have to set a value out of the values VALUE1, VALUE2, … for KEY.
+%!          Note: This notation usually implies that the values are mutually exclusive.
+%!                If this is not the case, then it is specified in the docstring.
+%!
+%!      VALUE
+%!        → This option is a trigger. Any VALUE you set can be treated as an if.
+%!
+%!      [VALUE1 | VALUE2 | …]
+%!        → This options are also triggers, but with the implied notation from above.
+%!
+%!      KEY1 / KEY2 / … = …
+%!        → You may also encounter this notation for key aliases.
+%!          Usually the KEY1 is the key that "does the stuff" and KEY2, … are just aliases for the key.
+%!
+%!      If a value is the default then `(default)` is written after the value.
+%!
+%!
+%! Basic usage:
+%!  Include the command `\RequirePackage{template}` *after* the `\documentclass{…}`.
+%!
+%!  Then, after your own configuration, you may invoke the processing / pagesetting. This is done by the command
+%!      \useTemplateStatic[…]
+%!
+%!  This command takes several arguments.
+%!
+%!      language / l = [english (default) | german]
+%!        → This option sets the language of the template.
+%!          This currently only has the effekt of setting the [USEnglish | ngerman] option to be set in the `babel` package.
+%!              Note: If you change languages you may have to delete the `main.aux` file on your system.
+%!                    If you are using e.g. overleaf to handle the compilation this won't be necessary.
+%!
+%!          The above choices can be abbreviated by [e | g] for english / german respectively
+%!
+%!      [large (default) / l | medium / m | small / s]
+%!        → Presets for the "level" - i.e. how much gets included - of the template.
+%!          These options are ordered by "how much" they include.
+%!
+%!      geometry / g = …
+%!        → This options sets the \geometry options.
+%!          Please refer to this package's documentation for the appropriate syntax.
+%!
+%!      pagestyle / p = [Emily (default) | None]
+%!        → This option sets the pagestyle.
+%!          The option `Emily` is my personal default. If you want to set up your own pagestyle either refer to the code
+%!          of the pagestyle → `\template@defaultlook` or set `pagestyle=None` and set it by yourself.
+%!
+%!      Ex / Exercise = …
+%!        → This sets the exercise number.
+%!          It may be any number which is appropriate for your document. Usually it is a Number ∈ [1, 2, …]
+%!
+%!      no renew / n
+%!        → Do not renew the \begin{align*} … \end{align*} environments
+%!          In the `templateMath.sty` align / alignat environments from amsmath get renewed to accept an additional, optional, parameter.
+%!          There the definitions from `amsmath.sty` are copy-pasted and added to them.
+%!          In case the file changes this *could* lead to unexplicable problems.
+%!
+%!          This option is here for easy debugging and I don't expect to use it often, as the same syntax is expected.
+%!
+%!
+%! Provided commands:
+%!
+%!  \useTemplateStatic
+%!  [\lf | \Lf | \LF]
+%!  \mktitle
+
+% Silence the "You have requested ..." errors.
+\RequirePackage{silence}
+\WarningFilter{latex}{You have requested package}
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{template}[2021/06/31 package template]
+
+% First we include some packages, which have to be present / are very commonly used.
+\RequirePackage[T1]{fontenc}        %
+\RequirePackage[utf8]{inputenc}     %
+\RequirePackage{titling}            %
+\RequirePackage{fancyhdr}           %
+\RequirePackage{geometry}           %
+\RequirePackage{lmodern}            %
+\RequirePackage{amsmath}            % /*
+\RequirePackage{amsfonts}           %    The math packages
+\RequirePackage{amssymb}            %
+\RequirePackage{stmaryrd}           % */
+\RequirePackage{datetime}           %
+\RequirePackage{trace}              % Package for debugging
+\RequirePackage{pgfkeys}            % This package is for digesting the [key=value] options.
+\RequirePackage{csquotes}           % Nice quotes
+\RequirePackage{xparse}             % Nice syntax for newcommands
+\RequirePackage{lastpage}           % Package for the fancy pagenumber
+\RequirePackage{nicefrac}           % Package for the fancy pagenumber
+\RequirePackage{xurl}               % Package for better urls
+\RequirePackage[svgnames]{xcolor}   % Colors!
+\RequirePackage{tocloft}            % Manipulate the table of contents
+\RequirePackage{hyperref}           % Make the links colorful!
+\RequirePackage{graphicx}           %
+\RequirePackage{xstring}            % /*
+\RequirePackage{xspace}             %   Logic
+\RequirePackage{ifthen}             %
+\RequirePackage{xifthen}            % */
+
+
+% Take the src/ folder into consideration
+\providecommand*{\input@path}{}
+\edef\input@path{{src/}\input@path}
+
+
+% A very nice package that provides the /.is code choice handler!
+\RequirePackage{ezkeys}
+
+
+%! --- Setup pgfkeys ---
+%!  Since we want to parse options we need to setup the package pgfkeys.
+%!
+%!  The package works mostly by assigning key-value pairs in a unix-like tree.
+%!  The tree is organized in the following manner:
+%!
+%!    /
+%!    │
+%!    ├── key1
+%!    │   ├── key1.1
+%!    │   ├── key1.2
+%!    │   ├── ...
+%!    │
+%!    ├── key2
+%!    │   ├── ...
+%!    ├── ...
+%!    ⋮
+%!
+
+%! Now we want to implement the top level key - which may be variable.
+\providecommand{\template@keyname}{template commands}
+
+%! You might ask why I set the name to \template@keyname. This is to ensure that the user (you) doesn't access this macro.
+%!                                              ^
+%! Of course, by calling \makeatletter you can get around this limitation.
+%!  And I don't want to limit you - but rather hide unnecessary detail. (and having an @ in the macro is what the cool kids do)
+
+%! Now we introduce that layer into the key tree:
+\pgfkeys{/\template@keyname/.is family}
+
+%! Setup some general purpose macros that prepend the \keyname.
+\providecommand{\template@makefamily}[1]{/\template@keyname/#1/.is family}
+\providecommand{\template@setfamily}[1]{/\template@keyname/#1}
+
+%! A macro that maybe makes /#1 if it is not empty.
+\providecommand{\template@path@if@not@empty}[1]{\ifdefempty{#1}{}{/#1}}
+
+%! Define the getter and setter which prepend the argument with \keyname.
+\providecommand{\template@getkey}[3][]{\pgfkeysgetvalue{/\template@keyname\template@path@if@not@empty{#1}/#2}{#3}}
+\providecommand{\template@setkey}[2][]{\pgfkeys{/\template@keyname\template@path@if@not@empty{#1}, #2}}
+
+%! -/- Setup pgfkeys ---
+
+
+%! --- Setup options ---
+
+%! Setup a new keyspace
+\providecommand{\template@setupName}{setup}
+
+%! Setup if / else statements for the maintained options
+\newif\if@template@option@medium
+\newif\if@template@option@all
+\newif\if@template@option@noRenew
+
+%! Define constants for languages. They probably won't change but variables are neat.
+\providecommand{\template@language@english}{420}
+\providecommand{\template@language@german}{69}
+
+%! Sets the language options.
+\providecommand{\template@setLanguage}[1]{
+% German
+    \if#1g
+    \RequirePackage[ngerman]{babel}
+    \fi
+    %
+    % English
+    \if#1e
+    \RequirePackage[USenglish]{babel}
+    \fi
+}
+
+
+%! These are the maintained options.
+%! Usually you want to refer to the above documentation. In case it didn't get maintained / is out of date you can try to decipher this.
+\pgfkeys{
+% setup the keyspace
+    \template@makefamily{\template@setupName},
+    \template@setfamily{\template@setupName},
+%
+% Configure language choices
+    language/.is code choice,
+    language/english/.code={\template@setLanguage{e}},
+    language/german/.code={\template@setLanguage{g}},
+%
+% Which parts of the template to include
+    medium/.is if=@template@option@medium,
+    all/.is if=@template@option@all,
+    no renew/.is if=@template@option@noRenew,
+%
+% Pagestyle options
+    pagestyle/.is code choice,
+    pagestyle/None/.code={},
+    pagestyle/Emily/.code={\template@defaultlook},
+%
+% Aliases
+    english/.code={\pgfkeysalso{language=english}},
+    german/.code={\pgfkeysalso{language=german}},
+    a/.code={\pgfkeysalso{all}},
+%
+% These are my defaults. They may, of course, be changed.
+    Ex/.initial=\relax,
+    all,
+    language=english,
+    pagestyle=Emily,
+    geometry/.initial={a4paper, total={17cm,24cm}},
+}
+
+%! Include the module choices. This is done now, rather than at the beginning, since it requires the `@setupName` keyspace and some other macros.
+\RequirePackage{moduleStyles}
+
+
+%! The purpose of this macro is to digest the static options which the user has given.
+%!  #1 = {KEY1 = VAL1, KEY2 = VAL2, …}
+%!      String that gets interpreted by pgfkeys.
+%!      Please refer to the beginning of this file for the according documentation.
+\providecommand{\useTemplateStatic}[1][]{%
+% Digest keys
+    \template@setkey[\template@setupName]{#1}
+    %
+    % Only handle the additional packages / templates to be input.
+    %
+    \if@template@option@medium
+    \RequirePackage{templateMedium}
+    \fi
+    %
+    \if@template@option@all
+    \RequirePackage{templateMedium}
+    \RequirePackage{templateAll}
+    \fi
+}
+
+
+%! The purpose of this macro is to digest the dynamic options which the user has given.
+%!  #1 = {KEY1 = VAL1, KEY2 = VAL2, …}
+%!      String that gets interpreted by pgfkeys.
+%!      Please refer to the beginning of this file for the according documentation.
+\providecommand{\useTemplate}[1][]{
+    \template@setkey[\template@setupName]{#1}
+    \template@setkey[\template@setupName]{language/.eval}
+    % Get the exercise number if it is not given.
+    \template@getkey[\template@setupName]{Ex}{\exerciseNumber}
+    \if\relax\exerciseNumber
+    \ClassWarning{template}{You did not supply an exercise number. If you know what you are doing, then go ahead. This might otherwise lead to problems.}{}
+    \fi
+    %
+    \template@setkey[\template@setupName]{pagestyle/.eval}
+    %
+    % Now, digest the module options.
+    \digestModules
+}
+
+
+%! -/- Setup options ---
+
+
+
+%! --- Setup paper look ---
+
+
+%! This is my personal preference for my documents.
+%! You may define your own custom style which you then use as your pagestyle.
+\providecommand{\template@defaultlook}{
+% First we have to load templateSmall for the neccessary includes.
+% Get the current geometry.
+    \template@getkey[\template@setupName]{geometry}{\template@theGeometry}
+    \expandafter\geometry\expandafter{\template@theGeometry}
+    %
+    \pagestyle{fancy}
+    \fancyhf{}
+    % Define the right header and footer.
+    \fancyhead[R]{\thedate}
+    \fancyfoot[C]{\thepage\;$\nicefrac{}{}$\;\pageref{LastPage}}
+    % The left header is missing. This gets handled in the module style.
+    % Depending on which module we have, one might want different people included.
+    %
+    % Make the fancy header options.
+    \setlength{\headheight}{20pt}
+    \setlength{\headsep}{25pt}
+    \renewcommand{\headrulewidth}{0.5pt}
+    %
+    % Better footnote settings
+    \setlength{\footnotesep}{11pt}
+    \setlength{\skip\footins}{19pt}
+%
+    %
+    % More space in tables.
+    \setlength{\tabcolsep}{5pt}
+    %
+    % No indents on newline.
+    \setlength{\parindent}{0pt}
+    %
+    % More space between paragraphs.
+    \RequirePackage{parskip}
+    %
+    % This forces tables to be "bigger" - so that the text is contained nicely in them.
+    \renewcommand{\arraystretch}{1.2}
+}
+
+%! -/- Setup paper look ---
+
+
+
+%! --- General purpose macros ---
+
+%! These macros do the line feed (\n) character in LaTeX. The difference is, that additional space is inserted.
+\providecommand{\LF}{\\[10pt]}
+\providecommand{\Lf}{\\[7pt]}
+\providecommand{\lf}{\\[3pt]}
+
+
+%! Inserts the title page with no page numbering.
+\let\oldMaketitle\maketitle
+\renewcommand{\maketitle}{\pagenumbering{gobble}\oldMaketitle\newpage\pagenumbering{arabic}}
+
+
+% Add `./images` to the graphics path
+\graphicspath{{./images}}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=black!10!blue,
+    citecolor=black!10!blue,
+    urlcolor=black!10!blue,
+    linktocpage=true,
+}
+
+% Colors!
+\providecommand{\colorA}{Cyan}
+\providecommand{\colorB}{ForestGreen}
+\providecommand{\colorC}{VioletRed}
+\providecommand{\colorD}{Dandelion}
+
+% A better hyperlink
+\let\oldHref\href
+\renewcommand{\href}[2]{%
+    \oldHref{#1}{#2}\footnote{\url{#1}}%
+}
+
+
+%! </General purpose macros>
+
+\ifdefined\endofdump\else
+\def\endofdump{}
+\fi

@@ -1,0 +1,339 @@
+%! This template provides a few complicated math commands.
+%!
+%!
+%! Provided commands:
+%!  [\LRA | \RA | \xequal | \xequiv]
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{templateTikz}[2021/06/15]
+
+
+
+\RequirePackage{tikz}
+\RequirePackage{graphicx}
+\RequirePackage{pgfplots}
+\pgfplotsset{compat=1.17}
+
+\usetikzlibrary{shapes.misc, automata, positioning, calc, 3d, arrows.meta, patterns, math, fit}
+
+\tikzset{cross/.style={cross out, draw=black, fill=none, minimum size=2*(#1-\pgflinewidth), inner sep=0pt, outer sep=0pt}, cross/.default={2pt}}
+\tikzset{>=Latex}
+
+
+%! Set up a new keyspace
+\providecommand{\template@math@symbol@name}{math symbol}
+
+%! This is a default setter for all symbol options.
+\providecommand{\symbolset}[1]{\template@setkey[\template@math@symbol@name]{#1}}
+
+%! Now we setup the keys that we can use.
+%!
+%! Arguments:
+%!  over = …
+%!      The overset to be put on top of the symbol.
+%!      This may be any form of string (maybe you will have to enclose it in {…}).
+%!          Note: The default way the text is display is math mode. To change this behavior you may place the argument in \text{…}.
+%!
+%!  under = …
+%!      The underset to be put under the symbol.
+%!      See the above documentation.
+%!          Note: If the `under` key is bigger in (horizontal) size than `over`,
+%!                the underset *will* overlap with other math that is present to either sides.
+%!                → To avoid this behaviour place the biggest part of your text on top.
+%!
+%!  kern = …
+%!      The kern to be placed after the symbol. The argument is a whole number.
+%!      This property will be adjusted automatically, however it can be manually overridden.
+%!      If `double align` is specified the kern is adjusted to a default (40), set in `\template@math@symbol@digestSpace`.
+%!      If not otherwise specified it defaults to 0.
+%!
+%!  no stretch
+%!      Do not stretch the symbol to fit the width of the `over` / `under` options.
+%!
+%!  align
+%!      If the `&` character shall be placed before the symbol.
+%!
+%!  double align
+%!      If the characters `&&` should be placed after the symbol.
+%!      This might be useful when aligning things that the symbol is always a certain amount away.
+%!
+%!  neg
+%!      If the symbol shall be negated.
+
+
+%! Setup all the options
+\pgfkeys{
+    \template@makefamily{\template@math@symbol@name},
+    \template@setfamily{\template@math@symbol@name},
+% Set if's
+    no stretch/.is if=@template@math@symbol@nostretch,
+    align/.is if=@template@math@symbol@align,
+    double align/.is if=@template@math@symbol@doublealign,
+    neg/.is if=@template@math@symbol@neg,
+% Set defaults
+    over/.initial=\relax,
+    under/.initial=\relax,
+    kern/.initial=\relax,
+}
+
+%! Implement if statements for `key=true`
+\newif\if@template@math@symbol@nostretch
+\newif\if@template@math@symbol@align
+\newif\if@template@math@symbol@doublealign
+\newif\if@template@math@symbol@neg
+
+%! This is a top-down approach at explaining how these macros work.
+
+%! First we define some actual macros, which shall use the symbol generator.
+%! These macros use the fancy xparse package which enables syntax like
+%!
+%! \LRA-30-
+%!
+%! to set the second parameter without setting the first.
+%!
+%! Examples:
+%! The default case:
+%!   \LRA
+%!
+%! Aligned:
+%!   \LRA[align]
+%!
+%! Overset with the word `xfce`:
+%!      \LRA[over=xfce]
+%!
+%! Note: The argument of the text is not enclosed in brackets / quotes.
+%!       The pgfkeys package parses the arguments where the argument is of the form [key={value}, …].
+%!       That means if you want your text to contain a special character like `=` you have to enclose it in {…} like this
+%!
+%!   \LRA[over={a=b}]
+%!
+%! Double aligned:
+%!   \LRA[double align]
+%!
+%! Negated:
+%!   \LRA[neg]
+%!
+%! These options may be mixed together in any form you may like.
+
+
+%! Arguments:
+%!  #1 = pgfkeys {key=value} list which is parsed by pgfkeys.
+%!  #2 = spacing.
+%!      If omitted a correct spacing is found. See the keys documentation for more explanation.
+\NewDocumentCommand{\LRA}{o D--{\relax}}{
+    \template@math@symbol@wrapper[\xLeftrightarrow]{\Leftrightarrow}{#1}{#2}
+}
+
+\NewDocumentCommand{\RA}{o D--{\relax}}{
+    \template@math@symbol@wrapper[\xRightarrow]{\Rightarrow}{#1}{#2}
+}
+
+\NewDocumentCommand{\xequal}{o D--{\relax}}{
+    \template@math@symbol@wrapper{=}{#1}{#2}
+}
+
+\NewDocumentCommand{\xequiv}{o D--{\relax}}{
+    \template@math@symbol@wrapper{\equiv}{#1}{#2}
+}
+
+%! This macro is a wrapper for `\template@math@symbol@make`. It digests the keys and sets the space accordingly.
+%!
+%! Arguments:
+%!  #1 = Alternative Stretch macro
+%!  #2 = Symbol
+%!  #3 = pgfkeys
+%!  #4 = Spacing
+\providecommand{\template@math@symbol@wrapper}[4][]{
+% Digest the options - if they aren't empty
+    \IfNoValueTF{#3}{}{
+        \template@setkey[\template@math@symbol@name]{#3}
+    }
+    %
+    \template@math@symbol@digestSpace{#4}
+    %
+    \template@math@symbol@make[#1]{#2}
+}
+
+%! Maybe make the `not` in the center of the symbol
+%!
+%! Arguments:
+%!  #1 = Use not -> 0/1
+%!  #2 = Symbol
+\providecommand{\maybeMakeNot}[2]{
+    \ifnum#1=1
+    \centernot{#2}
+    \else
+    #2
+    \fi
+}
+
+
+%! This is yet another helper for `\template@math@symbol@make` - or rather for the wrapper.
+%! This macro decides on how the space is set, according to the given configuration.
+%!
+%!  if (`kern` != `\relax`):
+%!      It is kept.
+%!
+%!  else if (#1 != `\relax`):
+%!      The kern is set to #1.
+%!
+%!  else if (double align is being used):
+%!      The kern is set to 40
+%!
+%!  else:
+%!      It is set to 0.
+%!
+%! Note: The value of the `double align` spacing is hard coded here.
+%! This is not optimal, however I can't get the expansion the right way round, so I shall keep it like this.
+%!
+%! Arguments:
+%!  #1 = Space
+\providecommand{\template@math@symbol@digestSpace}[1]{
+% Only override the value if none is present
+    \template@getkey[\template@math@symbol@name]{kern}{\theKern}
+    %
+    \if\relax\theKern
+    %
+    % If no Space given - find the best
+    \if\relax#1
+    %
+    % Only use the default spacing for the double align option
+    %
+    \if@template@math@symbol@doublealign
+    \template@setkey[\template@math@symbol@name]{kern=40}
+    \else
+    \template@setkey[\template@math@symbol@name]{kern=0}
+    \fi
+    %
+    \else
+    %
+    \template@setkey[\template@math@symbol@name]{kern=#1}
+    \fi
+    %
+    \fi
+}
+
+
+%! This is the general handler for any sort of Math char (⇒, ⇔, etc.), which has to be formatted.
+%! This macro *should* only be used by the `\template@math@symbol@wrapper` since no pgfkeys handling gets done here.
+%!
+%! Arguments:
+%!  #1 = Alternative macro to call, which will stretch.
+%!  #2 = Normal symbol, which gets handled.
+\providecommand{\template@math@symbol@make}[2][]{
+% First, we aquire the keys to use
+    \template@getkey[\template@math@symbol@name]{over}{\template@math@symbol@overset}
+    \template@getkey[\template@math@symbol@name]{under}{\template@math@symbol@underset}
+    \template@getkey[\template@math@symbol@name]{kern}{\template@math@symbol@space}
+    %
+    % We now set the keys global. This is to avoid any problems in other macros in particular with the `&` character.
+    % The `&` character causes a new group to be formed (in `align`), which clears all existing (manually created) definitions.
+    % To circumvent this we set all keys global. Since they are protected with the @ it is quite tricky for the user to screw up and access these macros.
+    \global\let\template@math@symbol@overset\template@math@symbol@overset
+    \global\let\template@math@symbol@underset\template@math@symbol@underset
+    \global\let\template@math@symbol@space\template@math@symbol@space
+    %
+    % Setup the normal symbol which may be overridden
+    \gdef\template@math@symbol@content{#2}
+    %
+    % If we don't want to stretch, only use the base operator.
+    \if@template@math@symbol@nostretch {
+        \gdef\template@math@symbol@command{\template@math@symbol@helper@funcNormalOverset}
+    } \else {
+    % Now check if we have a alternative macro given. If not ↓, then stretch the existing one.
+        \if\relax\detokenize{#1}\relax {
+        % Calculate the max of overset, underset and actual operator
+            \pgfmathsetmacro\template@math@symbol@boxWidth{max(width("$\template@math@symbol@content$"), width("$\template@math@symbol@overset$"), width("$\template@math@symbol@underset$"))}
+            \pgfmathsetmacro\template@math@symbol@boxHeight{height("$#2$")}
+            %
+            % Change into global definitions as per ↑
+            \global\let\template@math@symbol@boxWidth\template@math@symbol@boxWidth
+            \global\let\template@math@symbol@boxHeight\template@math@symbol@boxHeight
+            %
+            \gdef\template@math@symbol@command{\template@math@symbol@helper@funcScaleBox}
+%
+        } \else {
+        % only use the alternative command if over / under are not empty
+            \gdef\template@math@symbol@command{\template@math@symbol@helper@funcNormalOverset}
+            %
+            \ifdefempty{\template@math@symbol@overset}{}{
+                \gdef\template@math@symbol@command{\template@math@symbol@helper@funcAlternateSymbol}
+                \gdef\template@math@symbol@content{#1}
+            }
+            %
+            \ifdefempty{\template@math@symbol@underset}{}{
+                \gdef\template@math@symbol@command{\template@math@symbol@helper@funcAlternateSymbol}
+                \gdef\template@math@symbol@content{#1}
+            }
+        } \fi
+    } \fi
+    %
+    % Now handle all if@math@symbol@ cases
+    \if@template@math@symbol@align {
+        \gdef\template@math@symbol@useAlign{1}
+    } \else {
+        \gdef\template@math@symbol@useAlign{0}
+    } \fi
+    %
+    \if@template@math@symbol@doublealign {
+        \gdef\template@math@symbol@doubleAlign{&&}
+    } \else {
+        \gdef\template@math@symbol@doubleAlign{}
+    } \fi
+    %
+    \if@template@math@symbol@neg {
+        \gdef\template@math@symbol@neg{1}
+    } \else {
+        \gdef\template@math@symbol@neg{0}
+    } \fi
+    %
+    % Now execute the command!
+    \template@math@symbol@command{\template@math@symbol@useAlign}{\template@math@symbol@overset}{\template@math@symbol@underset}{\template@math@symbol@neg}{\template@math@symbol@content}%
+    \template@math@symbol@doubleAlign\kern \the\dimexpr \template@math@symbol@space pt
+}
+
+%! We now define a few helpers for the `\template@math@symbol@make` macro. Their use is to implement a universal interface for it to use.
+%!
+%! You may wonder why the macro is implemented with `\@firstoftwo / \@secondoftwo`.
+%! This is because the \if doesn't behave well with a `&`.
+%! Thus, we cleanup the if and only then process further. This is achieved by `\expandafter\@firstoftwo`
+%!
+%! All of the following helpers have the following arguments:
+%!
+%! Arguments:
+%!  #1 = align -> 0/1
+%!  #2 = overset
+%!  #3 = underset
+%!  #4 = neg -> 0/1
+%!  #5 = symbol
+\providecommand{\template@math@symbol@helper@funcNormalOverset}[5]{
+    \ifnum#1=1
+    \expandafter\@firstoftwo
+    \else
+    \expandafter\@secondoftwo
+    \fi
+    {\overset{#2}&{\underset{\mathclap{#3}}{\maybeMakeNot{#4}{#5}}}}
+    {\overset{#2}{\underset{#3}{\maybeMakeNot{#4}{#5}}}}
+}
+%
+\providecommand{\template@math@symbol@helper@funcAlternateSymbol}[5]{
+    \ifnum#1=1
+    \expandafter\@firstoftwo
+    \else
+    \expandafter\@secondoftwo
+    \fi
+    {&\maybeMakeNot{#4}{#5[#3]{#2}}}
+    {\maybeMakeNot{#4}{#5[#3]{#2}}}
+}
+%
+\providecommand{\template@math@symbol@helper@funcScaleBox}[5]{
+    \ifnum#1=1
+    \expandafter\@firstoftwo
+    \else
+    \expandafter\@secondoftwo
+    \fi
+    {\overset{#2}&{\maybeMakeNot{#4}{\underset{\mathclap{#3}}{\resizebox{\template@math@symbol@boxWidth pt}{\template@math@symbol@boxHeight pt}{$#5$}}}}}
+    {\maybeMakeNot{#4}{\overset{#2}{\underset{#3}{\resizebox{\template@math@symbol@boxWidth pt}{\template@math@symbol@boxHeight pt}{$#5$}}}}}
+}
+
+
