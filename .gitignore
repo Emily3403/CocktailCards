@@ -6,6 +6,7 @@ out
 
 *.backup
 .DS_Store
+*.pdf
 *.aux
 *.glo
 *.idx
@@ -28,4 +29,6 @@ out
 *.mtc
 *.mtc1
 *.out
+*.fls
+*.fdb_latexmk
 *.synctex.gz
