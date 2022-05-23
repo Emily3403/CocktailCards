@@ -183,210 +183,209 @@
 %! A macro that maybe makes /#1 if it is not empty.
 \providecommand{\template@path@if@not@empty}[1]{\ifdefempty{#1}{}{/#1}}
 
-%! Define the getter and setter which prepend the argument with \keyname.
-\providecommand{\template@getkey}[3][]{\pgfkeysgetvalue{/\template@keyname\template@path@if@not@empty{#1}/#2}{#3}}
-\providecommand{\template@setkey}[2][]{\pgfkeys{/\template@keyname\template@path@if@not@empty{#1}, #2}}
+    %! Define the getter and setter which prepend the argument with \keyname.
+    \providecommand{\template@getkey}[3][]{\pgfkeysgetvalue{/\template@keyname\template@path@if@not@empty{#1}/#2}{#3}}
+    \providecommand{\template@setkey}[2][]{\pgfkeys{/\template@keyname\template@path@if@not@empty{#1}, #2}}
 
-%! -/- Setup pgfkeys ---
+    %! -/- Setup pgfkeys ---
 
 
-%! --- Setup options ---
+    %! --- Setup options ---
 
-%! Setup a new keyspace
-\providecommand{\template@setupName}{setup}
+    %! Setup a new keyspace
+    \providecommand{\template@setupName}{setup}
 
-%! Setup if / else statements for the maintained options
-\newif\if@template@option@medium
-\newif\if@template@option@all
-\newif\if@template@option@noRenew
+    %! Setup if / else statements for the maintained options
+    \newif\if@template@option@medium
+    \newif\if@template@option@all
+    \newif\if@template@option@noRenew
 
-%! Define constants for languages. They probably won't change but variables are neat.
-\providecommand{\template@language@english}{420}
-\providecommand{\template@language@german}{69}
+    %! Define constants for languages. They probably won't change but variables are neat.
+    \providecommand{\template@language@english}{420}
+    \providecommand{\template@language@german}{69}
 
-%! Sets the language options.
-\providecommand{\template@setLanguage}[1]{
-% German
-    \if#1g
-    \RequirePackage[ngerman]{babel}
+    %! Sets the language options.
+    \providecommand{\template@setLanguage}[1]{
+        % German
+        \if#1g
+            \RequirePackage[ngerman]{babel}
+        \fi
+        %
+        % English
+        \if#1e
+            \RequirePackage[USenglish]{babel}
+        \fi
+    }
+
+
+    %! These are the maintained options.
+    %! Usually you want to refer to the above documentation. In case it didn't get maintained / is out of date you can try to decipher this.
+    \pgfkeys{
+        % setup the keyspace
+        \template@makefamily{\template@setupName},
+        \template@setfamily{\template@setupName},
+        %
+        % Configure language choices
+        language/.is code choice,
+        language/english/.code={\template@setLanguage{e}},
+        language/german/.code={\template@setLanguage{g}},
+        %
+        % Which parts of the template to include
+        medium/.is if=@template@option@medium,
+        all/.is if=@template@option@all,
+        no renew/.is if=@template@option@noRenew,
+        %
+        % Pagestyle options
+        pagestyle/.is code choice,
+        pagestyle/None/.code={},
+        pagestyle/Emily/.code={\template@defaultlook},
+        %
+        % Aliases
+        english/.code={\pgfkeysalso{language=english}},
+        german/.code={\pgfkeysalso{language=german}},
+        a/.code={\pgfkeysalso{all}},
+        %
+        % These are my defaults. They may, of course, be changed.
+        Ex/.initial=\relax,
+        all,
+        language=english,
+        pagestyle=Emily,
+        geometry/.initial={a4paper, total={17cm,24cm}},
+    }
+
+    %! Include the module choices. This is done now, rather than at the beginning, since it requires the `@setupName` keyspace and some other macros.
+    \RequirePackage{moduleStyles}
+
+
+    %! The purpose of this macro is to digest the static options which the user has given.
+    %!  #1 = {KEY1 = VAL1, KEY2 = VAL2, …}
+    %!      String that gets interpreted by pgfkeys.
+    %!      Please refer to the beginning of this file for the according documentation.
+    \providecommand{\useTemplateStatic}[1][]{%
+        % Digest keys
+        \template@setkey[\template@setupName]{#1}
+        %
+        % Only handle the additional packages / templates to be input.
+        %
+        \if@template@option@medium
+            \RequirePackage{templateMedium}
+        \fi
+        %
+        \if@template@option@all
+            \RequirePackage{templateMedium}
+            \RequirePackage{templateAll}
+        \fi
+    }
+
+
+    %! The purpose of this macro is to digest the dynamic options which the user has given.
+    %!  #1 = {KEY1 = VAL1, KEY2 = VAL2, …}
+    %!      String that gets interpreted by pgfkeys.
+    %!      Please refer to the beginning of this file for the according documentation.
+    \providecommand{\useTemplate}[1][]{
+        \template@setkey[\template@setupName]{#1}
+        \template@setkey[\template@setupName]{language/.eval}
+        % Get the exercise number if it is not given.
+        \template@getkey[\template@setupName]{Ex}{\exerciseNumber}
+        \if\relax\exerciseNumber
+            \ClassWarning{template}{You did not supply an exercise number. If you know what you are doing, then go ahead. This might otherwise lead to problems.}{}
+        \fi
+        %
+        \template@setkey[\template@setupName]{pagestyle/.eval}
+        %
+        % Now, digest the module options.
+        \digestModules
+    }
+
+
+    %! -/- Setup options ---
+
+
+
+    %! --- Setup paper look ---
+
+
+    %! This is my personal preference for my documents.
+    %! You may define your own custom style which you then use as your pagestyle.
+    \providecommand{\template@defaultlook}{
+        % First we have to load templateSmall for the neccessary includes.
+        % Get the current geometry.
+        \template@getkey[\template@setupName]{geometry}{\template@theGeometry}
+        \expandafter\geometry\expandafter{\template@theGeometry}
+        %
+        \pagestyle{fancy}
+        \fancyhf{}
+        % Define the right header and footer.
+        % The left header is missing. This gets handled in the module style.
+        % Depending on which module we have, one might want different people included.
+        %
+        % Make the fancy header options.
+        \setlength{\headheight}{20pt}
+        \setlength{\headsep}{25pt}
+        \renewcommand{\headrulewidth}{0.5pt}
+        \renewcommand{\footrulewidth}{0.5pt}
+        %
+        % Better footnote settings
+        \setlength{\footnotesep}{11pt}
+        \setlength{\skip\footins}{19pt}
+        %
+        %
+        % More space in tables.
+        \setlength{\tabcolsep}{5pt}
+        %
+        % No indents on newline.
+        \setlength{\parindent}{0pt}
+        %
+        % More space between paragraphs.
+        \RequirePackage{parskip}
+        %
+        % This forces tables to be "bigger" - so that the text is contained nicely in them.
+        \renewcommand{\arraystretch}{1.2}
+    }
+
+    %! -/- Setup paper look ---
+
+
+
+    %! --- General purpose macros ---
+
+    %! These macros do the line feed (\n) character in LaTeX. The difference is, that additional space is inserted.
+    \providecommand{\LF}{\\[10pt]}
+    \providecommand{\Lf}{\\[7pt]}
+    \providecommand{\lf}{\\[3pt]}
+
+
+    %! Inserts the title page with no page numbering.
+    \let\oldMaketitle\maketitle
+    \renewcommand{\maketitle}{\pagenumbering{gobble}\oldMaketitle\newpage\pagenumbering{arabic}}
+
+
+    % Add `./images` to the graphics path
+    \graphicspath{{./images}}
+
+    \hypersetup{
+        colorlinks=true,
+        linkcolor=black!10!blue,
+        citecolor=black!10!blue,
+        urlcolor=black!10!blue,
+        linktocpage=true,
+    }
+
+    % Colors!
+    \providecommand{\colorA}{Cyan}
+    \providecommand{\colorB}{ForestGreen}
+    \providecommand{\colorC}{VioletRed}
+    \providecommand{\colorD}{Dandelion}
+
+    % A better hyperlink
+    \let\oldHref\href
+    \renewcommand{\href}[2]{%
+        \oldHref{#1}{#2}\footnote{\url{#1}}%
+    }
+
+
+    %! </General purpose macros>
+
+    \ifdefined\endofdump\else
+        \def\endofdump{}
     \fi
-    %
-    % English
-    \if#1e
-    \RequirePackage[USenglish]{babel}
-    \fi
-}
-
-
-%! These are the maintained options.
-%! Usually you want to refer to the above documentation. In case it didn't get maintained / is out of date you can try to decipher this.
-\pgfkeys{
-% setup the keyspace
-    \template@makefamily{\template@setupName},
-    \template@setfamily{\template@setupName},
-%
-% Configure language choices
-    language/.is code choice,
-    language/english/.code={\template@setLanguage{e}},
-    language/german/.code={\template@setLanguage{g}},
-%
-% Which parts of the template to include
-    medium/.is if=@template@option@medium,
-    all/.is if=@template@option@all,
-    no renew/.is if=@template@option@noRenew,
-%
-% Pagestyle options
-    pagestyle/.is code choice,
-    pagestyle/None/.code={},
-    pagestyle/Emily/.code={\template@defaultlook},
-%
-% Aliases
-    english/.code={\pgfkeysalso{language=english}},
-    german/.code={\pgfkeysalso{language=german}},
-    a/.code={\pgfkeysalso{all}},
-%
-% These are my defaults. They may, of course, be changed.
-    Ex/.initial=\relax,
-    all,
-    language=english,
-    pagestyle=Emily,
-    geometry/.initial={a4paper, total={17cm,24cm}},
-}
-
-%! Include the module choices. This is done now, rather than at the beginning, since it requires the `@setupName` keyspace and some other macros.
-\RequirePackage{moduleStyles}
-
-
-%! The purpose of this macro is to digest the static options which the user has given.
-%!  #1 = {KEY1 = VAL1, KEY2 = VAL2, …}
-%!      String that gets interpreted by pgfkeys.
-%!      Please refer to the beginning of this file for the according documentation.
-\providecommand{\useTemplateStatic}[1][]{%
-% Digest keys
-    \template@setkey[\template@setupName]{#1}
-    %
-    % Only handle the additional packages / templates to be input.
-    %
-    \if@template@option@medium
-    \RequirePackage{templateMedium}
-    \fi
-    %
-    \if@template@option@all
-    \RequirePackage{templateMedium}
-    \RequirePackage{templateAll}
-    \fi
-}
-
-
-%! The purpose of this macro is to digest the dynamic options which the user has given.
-%!  #1 = {KEY1 = VAL1, KEY2 = VAL2, …}
-%!      String that gets interpreted by pgfkeys.
-%!      Please refer to the beginning of this file for the according documentation.
-\providecommand{\useTemplate}[1][]{
-    \template@setkey[\template@setupName]{#1}
-    \template@setkey[\template@setupName]{language/.eval}
-    % Get the exercise number if it is not given.
-    \template@getkey[\template@setupName]{Ex}{\exerciseNumber}
-    \if\relax\exerciseNumber
-    \ClassWarning{template}{You did not supply an exercise number. If you know what you are doing, then go ahead. This might otherwise lead to problems.}{}
-    \fi
-    %
-    \template@setkey[\template@setupName]{pagestyle/.eval}
-    %
-    % Now, digest the module options.
-    \digestModules
-}
-
-
-%! -/- Setup options ---
-
-
-
-%! --- Setup paper look ---
-
-
-%! This is my personal preference for my documents.
-%! You may define your own custom style which you then use as your pagestyle.
-\providecommand{\template@defaultlook}{
-% First we have to load templateSmall for the neccessary includes.
-% Get the current geometry.
-    \template@getkey[\template@setupName]{geometry}{\template@theGeometry}
-    \expandafter\geometry\expandafter{\template@theGeometry}
-    %
-    \pagestyle{fancy}
-    \fancyhf{}
-    % Define the right header and footer.
-    \fancyhead[R]{\thedate}
-    \fancyfoot[C]{\thepage\;$\nicefrac{}{}$\;\pageref{LastPage}}
-    % The left header is missing. This gets handled in the module style.
-    % Depending on which module we have, one might want different people included.
-    %
-    % Make the fancy header options.
-    \setlength{\headheight}{20pt}
-    \setlength{\headsep}{25pt}
-    \renewcommand{\headrulewidth}{0.5pt}
-    %
-    % Better footnote settings
-    \setlength{\footnotesep}{11pt}
-    \setlength{\skip\footins}{19pt}
-%
-    %
-    % More space in tables.
-    \setlength{\tabcolsep}{5pt}
-    %
-    % No indents on newline.
-    \setlength{\parindent}{0pt}
-    %
-    % More space between paragraphs.
-    \RequirePackage{parskip}
-    %
-    % This forces tables to be "bigger" - so that the text is contained nicely in them.
-    \renewcommand{\arraystretch}{1.2}
-}
-
-%! -/- Setup paper look ---
-
-
-
-%! --- General purpose macros ---
-
-%! These macros do the line feed (\n) character in LaTeX. The difference is, that additional space is inserted.
-\providecommand{\LF}{\\[10pt]}
-\providecommand{\Lf}{\\[7pt]}
-\providecommand{\lf}{\\[3pt]}
-
-
-%! Inserts the title page with no page numbering.
-\let\oldMaketitle\maketitle
-\renewcommand{\maketitle}{\pagenumbering{gobble}\oldMaketitle\newpage\pagenumbering{arabic}}
-
-
-% Add `./images` to the graphics path
-\graphicspath{{./images}}
-
-\hypersetup{
-    colorlinks=true,
-    linkcolor=black!10!blue,
-    citecolor=black!10!blue,
-    urlcolor=black!10!blue,
-    linktocpage=true,
-}
-
-% Colors!
-\providecommand{\colorA}{Cyan}
-\providecommand{\colorB}{ForestGreen}
-\providecommand{\colorC}{VioletRed}
-\providecommand{\colorD}{Dandelion}
-
-% A better hyperlink
-\let\oldHref\href
-\renewcommand{\href}[2]{%
-    \oldHref{#1}{#2}\footnote{\url{#1}}%
-}
-
-
-%! </General purpose macros>
-
-\ifdefined\endofdump\else
-\def\endofdump{}
-\fi
