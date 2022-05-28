@@ -15,17 +15,18 @@
 
 \date{}
 \useTemplate[english]
-% TODO: Remove page number
 
+% TODO: Auto balance the spacing such that two cocktails are on the same page.
+
+\def\ml#1{%
+    \pgfmathsetmacro\result{#1 * 0.033814}%
+    \pgfmathprintnumberto[precision=2]{\result}{\result}%
+    #1 ml (\result oz.)%
+}
 \def\counter{1}
 
 % #1 = name, #2 = ingredients (pgffor), #3 = Equipment (pgffor), #4 = Method (pgffor)
 \def\cocktail#1#2#3#4{
-    \pgfmathsetmacro\counter{int(mod(\counter + 1, 2))}
-    \ifnum \counter=1
-        \hfill
-        \hrule
-    \fi
     \vspace{15pt}
     %
     \begin{center}
@@ -36,37 +37,32 @@
         \foreach \x in {#2} {
             \item \x
             }
-\end{itemize}
-%
-\vspace{5pt}
-\textbf{Equipment: }%
-\foreach[count=\i] \x in {#3}{\ifnum\i=1\else, \fi\x}%
-%
-\vspace*{7pt}%
-\\%
-\textbf{Method:}
-\begin{enumerate}
-    \foreach \x in {#4} {
-        \item \x
-        }
-\end{enumerate}
-%
-\vspace{20pt}
-\ifnum \counter=1
+    \end{itemize}
+    %
+    \vspace{5pt}
+    \textbf{Equipment: }%
+    \foreach[count=\i] \x in {#3}{\ifnum\i=1\else, \fi\x}%
+    %
+    \vspace*{7pt}%
+    \\%
+    \textbf{Method:}
+    \begin{enumerate}
+        \foreach \x in {#4} {
+            \item \x
+            }
+    \end{enumerate}
+    %
+    \vspace{20pt}
     \newpage
-\fi
 }
 
-
-% TODO: Discuss if / how ml vs oz.
 
 \begin{document}
 
 \cocktail{The Tipperary}{
-    60ml single pot still Irish whiskey,
-    20ml sweet vermouth,
-    10ml green Chartreuse,
-    2 dashes orange bitters,
+    \ml{60} single pot still Irish whiskey,
+    \ml{20} sweet Vermouth,
+    \ml{10} green Chartreuse,
     2 dashes orange bitters
 }
 %
@@ -81,29 +77,27 @@
 
 
 \cocktail{Rum Monte Sour}{
-    45ml (1 1/2oz) Amaro Montenegro,
-    15ml (1/2oz) dark rum,
-    30ml (1 oz) lemon juice,
-    5ml (1/6oz) sugar syrup,
-    10-15ml egg white,
-    Orange twist to garnish,
+    \ml{45} Amaro Montenegro,
+    \ml{15} dark rum,
+    \ml{30} lemon juice,
+    \ml{5} sugar syrup,
+    10-\ml{15} egg white,
+    Orange twist to garnish
 }
 %
 {jigger, shaker tins, hawthorn strainer, fine strainer, rocks glass, large ice block}
 %
 {
-    Add all ingredients to shaker tins, dry shake (without ice) to emulsify – hold tins
-    tightly!,
-    Add ice and shake again, then double strain over good ice in to your rocks glass
+    {Add all ingredients to shaker tins, dry shake (without ice) to emulsify -- hold tins tightly!},
+    {Add ice and shake again, then double strain over good ice in to your rocks glass}
     (using the hawthorn strainer and fine strainer).,
-    Fold twist over the top of the drink to expel the oils, then arrange in glass to
-    garnish.
+    {Fold twist over the top of the drink to expel the oils, then arrange in glass to garnish.}
 }
 
 \cocktail{The Treacle}{
-    60ml (2oz) dark rum,
-    10ml (1/3oz) demerara sugar syrup,
-    15ml (1/2oz) cloudy apple juice,
+    \ml{60}  dark rum,
+    \ml{10}  demerara sugar syrup,
+    \ml{15}  cloudy apple juice,
     2 dashes black walnut bitters,
     Orange twist to garnish
 }
@@ -118,13 +112,13 @@
 Give orange twist a sharp fold over the top to expel oils and drop in to garnish.}
 
 \cocktail{The Scofflaw}{
-    50ml (1 \& 3/4oz) rye whiskey,
-    25ml (3/4oz) dry vermouth,
-    10ml (1/3oz) grenadine,
+    \ml{50} rye whiskey,
+    \ml{25} dry vermouth,
+    \ml{10} grenadine,
+    \ml{15} lemon juice,
     2 dashes of orange bitters,
-    15ml (1/2oz) lemon juice,
     Lemon twist to garnish,
-    Good ice,
+    Good ice
 }
 %
 {coupe glass, jigger, shaker tins, hawthorn strainer, fine strainer}
@@ -132,20 +126,21 @@ Give orange twist a sharp fold over the top to expel oils and drop in to garnish
 {Add all of the ingredients to your shaker tin.,
     Fill shaker tin full with ice.,
     Combine tins and shake until the tins become frosted.,
-    Open tins, double strain into a chilled coupe.,
-Squeeze lemon twist to expel the citrus oil over it, add the twist to the drink.}
+    {Open tins, double strain into a chilled coupe.},
+    {Squeeze lemon twist to expel the citrus oil over it, add the twist to the drink.}
+}
 
 
 
 
 \cocktail{Mojito}{
-    60ml (2oz) white rum,
-    20ml (2/3oz) fresh lime juice,
-    20ml (2/3oz) sugar syrup,
-    6 – 8 mint leaves,
+    \ml{60}  white rum,
+    \ml{20}  fresh lime juice,
+    \ml{20}  sugar syrup,
+    6 -- 8 mint leaves,
     Top soda water (optional),
     Crushed ice,
-    Mint sprig to garnish,
+    Mint sprig to garnish
 }
 %
 {jigger, barspoon, highball glass, tea towel, wooden mallet/rolling pin, bar
@@ -153,12 +148,13 @@ napkin (unless you’re making it for yourself!)}
 %
 {
     {Crush your ice if you don’t have a crushed ice machine to hand. Use tea towel and
-    wooden mallet for this (wrap ice in tea towel, then smash)},
+    wooden mallet for this (wrap ice in tea towel, then smash).},
     Add all ingredients to glass and fill with ice to just under top of glass.,
-    {    I don’t muddle – just give the mint a gentle clap – so as to keep the drink
+    {    I don’t muddle -- just give the mint a gentle clap -- so as to keep the drink
     lighter and fresher, but if you do, do it gently.},
     Place barspoon in the glass and cover the top with the bar napkin.,
-    Churn through, add more ice and repeat until the glass is pretty much full and the mint is suspended through the drink.,
+    {Churn through, add more ice and repeat until the glass is pretty much full and the
+    mint is suspended through the drink.},
     Top with a cap of crushed ice and some soda water if you like a little spritz.,
     {Garnish with a mint sprig, and enjoy!}
 }
@@ -166,15 +162,15 @@ napkin (unless you’re making it for yourself!)}
 
 
 \cocktail{Long Island Ice Tea}{
-    15ml (1/2oz) vodka,
-    15ml (1/2oz) gin,
-    15ml (1/2oz) white rum,
-    15ml (1/2oz) tequila,
-    15ml (1/2oz) curacao/triple sec,
-    15ml (1/2oz) sugar syrup,
-    30ml fresh lemon juice,
-    Around 45ml coca cola,
-    A skewered lemon wheel and cocktail cherry to garnish,
+    \ml{15}  vodka,
+    \ml{15}  gin,
+    \ml{15}  white rum,
+    \ml{15}  tequila,
+    \ml{15}  curacao/triple sec,
+    \ml{15}  sugar syrup,
+    \ml{30} fresh lemon juice,
+    Around \ml{45} coca cola,
+    A skewered lemon wheel and cocktail cherry to garnish
 }
 %
 {jigger, shaker tins, hawthorn strainer, highball glass}
@@ -184,19 +180,20 @@ napkin (unless you’re making it for yourself!)}
     Pour the coca cola in to your serving glass.,
     {Fill your shaker tin with ice, seal and shake hard.},
     {Pop the tins open, but before you pour, add ice to your serving glass.},
-    Use hawthorn strainer to hold the ice back in your tins and pour slowly over fresh ice – this should create a layered effect.,
+    Use hawthorn strainer to hold the ice back in your tins and pour slowly over fresh
+    ice -- this should create a layered effect.,
     {Garnish with your skewered lemon and cherry, and enjoy!}
 }
 
 
 \cocktail{Mai Thai}{
-    60ml (2oz) dark rum,
-    25ml (5/6oz) fresh lime juice,
-    15ml (1/2oz) triple sec or curacao,
-    10ml (1/4oz) orgeat syrup,
-    5-10ml (1/4oz) rich demerara sugar syrup,
+    \ml{60}  dark rum,
+    \ml{25}  fresh lime juice,
+    \ml{15}  triple sec or curacao,
+    \ml{10}  orgeat syrup,
+    5-\ml{10}  rich demerara sugar syrup,
     Spent lime husk,
-    Mint sprig to garnish,
+    Mint sprig to garnish
 }
 %
 {jigger, shaker tins, rocks glass (for tiki spirit!), straw}
@@ -205,19 +202,19 @@ napkin (unless you’re making it for yourself!)}
     {Squeeze your lime juice, keeping one of the half husks.},
     {Add all of the ingredients except the mint into shaker tin.},
     {Fill your tin with ice, seal and shake as hard as you can.},
-    {I like to serve this drink as a ‘shake and dump’, that is with no strainers. It is a no fuss beach drink, after all!},
-    {Garnish to look like a tropical island, and enjoy! :)}
+    {I like to serve this drink as a \enquote{shake and dump}, that is with no strainers. It is a no fuss beach drink, after all!},
+    {Garnish to look like a tropical island, and enjoy! }
 }
 
 \cocktail{ZOMBIE}{
-    25ml Dark Rum,
-    25ml Golden Rum,
-    25ml Triple Sec,
-    15ml Lime Juice,
-    40ml Orange Juice,
-    25ml Passionfruit Puree,
-    7.5ml Grenadine,
-    2 Dashes Angostura Bitters,
+    \ml{25} Dark Rum,
+    \ml{25} Golden Rum,
+    \ml{25} Triple Sec,
+    \ml{15} Lime Juice,
+    \ml{40} Orange Juice,
+    \ml{25} Passionfruit Puree,
+    7.\ml{5} Grenadine,
+    2 Dashes Angostura Bitter
 }
 %
 {jigger, shaker tins, rocks glass, straw}
@@ -230,31 +227,32 @@ napkin (unless you’re making it for yourself!)}
 }
 
 \cocktail{Negroni}{
-    30ml (1oz) London Dry gin,
-    30ml (1oz) sweet vermouth,
-    30ml (1oz) Campari,
+    \ml{30}  London Dry gin,
+    \ml{30}  sweet vermouth,
+    \ml{30}  Campari,
     Orange twist to garnish,
-    Good ice,
+    Good ice
 }
 %
 {rocks glass, mixing glass, jigger, barspoon, julep strainer}
 %
 {
-    {Prep twist}
-    {Add all of the ingredients to the mixing glass, fill with as much ice as possible}
-    {Stir until desired dilution}
-    {Strain over good quality ice}
-    {Squeeze the orange twist to expel the citrus oil over the drink, add the twist to drink}
+    {Prep twist.},
+    {Add all of the ingredients to the mixing glass, fill with as much ice as possible.},
+    {Stir until desired dilution.},
+    {Strain over good quality ice.},
+    {Squeeze the orange twist to expel the citrus oil over the drink, add the twist to
+    drink.}
 }
 
-\cocktail{TODO}{
-    40ml (1 \& 1/3 oz) London Dry gin (Navy Strength if you can find it),
-    15ml (1/2 oz) fresh lemon juice,
-    15ml (1/2 oz) fino sherry,
-    15ml (1/2 oz) sugar syrup,
+\cocktail{London Calling}{
+    \ml{40}  London Dry gin (Navy Strength if you can find it),
+    \ml{15}  fresh lemon juice,
+    \ml{15}  fino sherry,
+    \ml{15}  sugar syrup,
     2 dashes of orange bitters,
     Good ice,
-    Grapefruit twist to garnish,
+    Grapefruit twist to garnish
 }
 %
 {coupe, jigger, shaker tins, hawthorn strainer, fine strainer}
@@ -267,11 +265,11 @@ napkin (unless you’re making it for yourself!)}
 }
 
 \cocktail{1934 Cosmopolitan Cocktail}{
-    60ml Gin,
-    15ml Cointreau,
-    25ml Lemon Juice,
-    10ml Raspberry Syrup,
-    2 dashes of orange bitters,
+    \ml{60} Gin,
+    \ml{15} Cointreau,
+    \ml{25} Lemon Juice,
+    \ml{10} Raspberry Syrup,
+    2 dashes of orange bitters
 }
 %
 {jigger, shaker tins, fine strainer, chilled coupe glass}
@@ -282,71 +280,70 @@ napkin (unless you’re making it for yourself!)}
 }
 
 \cocktail{Saturn}{
-    {1,25 ounces gin},
-    {1/2 ounce lemon juice, freshly squeezed},
-    {1/2 ounce passion fruit syrup},
-    {1/4 ounce falernum},
-    {1/4 ounce orgeat},
+    {\ml{40} gin},
+    {\ml{15} lemon juice, freshly squeezed},
+    {\ml{15} passion fruit syrup},
+    {\ml{7} falernum},
+    {\ml{7} ounce orgeat},
     {Garnish: edible flower},
-    {Garnish: orange twist},
+    {Garnish: orange twist}
 }
 %
 {blender (alternatively shaker tins), crushed ice, jigger, highball glass}
 %
 {
-    Add all (non-garnish) ingredients to a blender (or shaker) with crushed ice,
-    Blend (or shake) a few seconds until smooth,
-    Pour unstrained into a Tiki mug or highball glass,
-    Garnish with an edible flower and an orange twist
+    Add all (non-garnish) ingredients to a blender (or shaker) with crushed ice.,
+    Blend (or shake) a few seconds until smooth.,
+    Pour unstrained into a Tiki mug or highball glass.,
+    Garnish with an edible flower and an orange twist.
 }
 
-<<<<<<< Updated upstream
 \cocktail{The Sazerac}{
-    60ml (2oz) rye,
-    10ml (1/3 oz) sugar syrup,
+    \ml{60}  rye,
+    \ml{10}  sugar syrup,
+    10 -- \ml{15}  absinthe to rinse,
     4 dashes Peychaud’s bitters,
-    10 – 15ml (1/3 – 1/2oz) absinthe to rinse,
-    Lemon twist to garnish,
+    Lemon twist to garnish
 }
 %
 {jigger, mixing glass, barspoon, julep strainer, small rock glass, shot glass}
 %
 {
-    {Prepare a small coin of lemon peel},
-    {Fill serving glass with ice, add the absinthe, give a stir and leave to chill},
-    {Add all of the other ingredients to your mixing glass},
-    {Fill with ice, stir by pushing the ice around with the back of your spoon against the inside of the glass},
-    {Once chilled and diluted, strain the absinthe from the serving glass into the shot glass and discard the ice, then strain the drink into the serving glass},
-    {Fold your lemon peel sharply over the drink to expel the oils, then discard},
-    {Serve your Sazerac with the absinthe on the side (if you like!)}
+    {Prepare a small coin of lemon peel.},
+    {Fill serving glass with ice, add the absinthe, give a stir and leave to chill.},
+    {Add all of the other ingredients to your mixing glass.},
+    {Fill with ice, stir by pushing the ice around with the back of your spoon against the inside of the glass.},
+    {Once chilled and diluted, strain the absinthe from the serving glass into the shot glass and discard the ice, then strain the drink into the serving glass.},
+    {Fold your lemon peel sharply over the drink to expel the oils, then discard.},
+    {Serve your Sazerac with the absinthe on the side (if you like!).}
 }
 
 \cocktail{Manhattan}{
-    50ml (1 \& 2/3oz) rye whiskey,
-    20ml (2/3oz) sweet vermouth,
+    \ml{50} rye whiskey,
+    \ml{20} sweet vermouth,
     2 good dashes Angostura bitters,
     Orange twist,
     Good ice,
-    Good quality cherry (e.g. Morello) to garnish,
+    Good quality cherry (e.g. Morello) to garnish
 }
 %
 {chilled coupe glass, mixing glass, jigger, julep strainer, bar spoon}
 %
 {
-    {Prep your twist (doesn’t have to be pretty, you will be discarding it)},
-    {Add all ingredients to the mixing glass, fill with as much ice as possible},
-    {Stir until desired dilution},
-    {Strain into chilled coupe glass},
-    {Squeeze the orange twist to expel the citrus oil over the drink, then discard},
+    {Prep your twist (doesn’t have to be pretty, you will be discarding it).},
+    {Add all ingredients to the mixing glass, fill with as much ice as possible.},
+    {Stir until desired dilution.},
+    {Strain into chilled coupe glass.},
+    {Squeeze the orange twist to expel the citrus oil over the drink, then discard.},
     {Add your cherry to garnish, and enjoy!}
 }
 
 \cocktail{Hemingway Daiquiri}{
-    60ml (2oz) white rum,
-    15ml (1/2 oz) lime juice,
-    15ml (1/2 oz) grapefruit juice,
-    10ml (1/3 oz) maraschino liqueur,
-    5ml (1/6 oz) sugar syrup,
+    \ml{60}  white rum,
+    \ml{15}  lime juice,
+    \ml{15}  grapefruit juice,
+    \ml{10}  maraschino liqueur,
+    \ml{5}  sugar syrup,
     Maraschino cherry to garnish,
     Grapefruit zest to twist and discard
 }
@@ -354,12 +351,12 @@ napkin (unless you’re making it for yourself!)}
 {shaker tins, jigger, hawthorne strainer, fine strainer, straw for tasting}
 %
 {
-    {Add all non-garnish ingredients to shaker tins with ice},
-    {Shake hard until the tins get frosted},
-    {Taste test with straw (grapefruit is sometimes quite bitter depending on the season)},
-    {Double strain into chilled coupe glass},
-    {Twist grapefruit zest over drink, then discard},
-    {Pop maraschino cherry into drink as garnish}
+    {Add all non-garnish ingredients to shaker tins with ice.},
+    {Shake hard until the tins get frosted.},
+    {Taste test with straw (grapefruit is sometimes quite bitter depending on the season).},
+    {Double strain into chilled coupe glass.},
+    {Twist grapefruit zest over drink, then discard.},
+    {Pop maraschino cherry into drink as garnish.}
 }
 
 %\cocktail{}{
@@ -371,17 +368,7 @@ napkin (unless you’re making it for yourself!)}
 %{
 %
 
-=======
-%\cocktail{}{
-
-%}
-%
-%{}
-%
-%{
-
-%}
->>>>>>> Stashed changes
+% TODO: Add Green Mamba
 
 \end{document}
 
