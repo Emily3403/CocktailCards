@@ -19,9 +19,9 @@
 % TODO: Auto balance the spacing such that two cocktails are on the same page.
 
 \def\ml#1{%
-    \pgfmathsetmacro\result{#1 * 0.033814}%
+    \pgfmathsetmacro\result{#1 * 0.0333}%0.03814}%
     \pgfmathprintnumberto[precision=2]{\result}{\result}%
-    #1 ml (\result oz.)%
+    #1 ml (\result~oz.)%
 }
 \def\counter{1}
 
@@ -30,13 +30,13 @@
     \vspace{15pt}
     %
     \begin{center}
-        \bf{#1}
+        {\bf#1}
     \end{center}
     \textbf{Ingredients:}
     \begin{itemize}
-        \foreach \x in {#2} {
+        \foreach \x in {#2} {%
             \item \x
-            }
+        }
     \end{itemize}
     %
     \vspace{5pt}
@@ -47,9 +47,9 @@
     \\%
     \textbf{Method:}
     \begin{enumerate}
-        \foreach \x in {#4} {
+        \foreach \x in {#4} {%
             \item \x
-            }
+        }
     \end{enumerate}
     %
     \vspace{20pt}
@@ -73,7 +73,6 @@
     Add all of your ingredients to your mixing glass and fill with ice.,
     Stir with barspoon by placing the back of the spoon against the inside of the glass and pushing the ice around until chilled and diluted.
 }
-
 
 
 \cocktail{Rum Monte Sour}{
@@ -129,8 +128,6 @@ Give orange twist a sharp fold over the top to expel oils and drop in to garnish
     {Open tins, double strain into a chilled coupe.},
     {Squeeze lemon twist to expel the citrus oil over it, add the twist to the drink.}
 }
-
-
 
 
 \cocktail{Mojito}{
