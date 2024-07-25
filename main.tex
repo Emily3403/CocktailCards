@@ -1,8 +1,10 @@
 \documentclass[11pt]{article}
+\usepackage{textcomp}
 
 \RequirePackage[USenglish]{babel}
 \RequirePackage{microtype}          % Better typography
-\RequirePackage[T1]{fontenc}        %
+\usepackage{pacioli}
+\RequirePackage[OT1]{fontenc}        %
 \RequirePackage[utf8]{inputenc}     %
 \RequirePackage{fancyhdr}           %
 \RequirePackage{geometry}           %
@@ -14,6 +16,10 @@
 \RequirePackage[svgnames]{xcolor}   % Colors!
 \RequirePackage{graphicx}           %
 \RequirePackage{parskip}
+\RequirePackage{subfiles}
+\RequirePackage{pgfornament}        % Ornaments
+\RequirePackage{background}         % in the background!
+\RequirePackage{booktabs}
 \RequirePackage{pgffor}
 \RequirePackage{hyperref}           % Make the links colorful!
 
@@ -22,112 +28,127 @@
 
 \pagestyle{fancy}
 \fancyhf{}
+\def\currentCategoryName{}
+
+\fancyfoot[c]{\\[10pt]\Large\thepage}
+% This has to be done in this way, instead of setting \fancyhead directly, because some form of global state and variables are involved.
+% This, in turn, leads to subfiles not being able to set the header for the main file. So use a \xdef to store it globally
+
+\fancyhead[c]{\LARGE \textsc{\currentCategoryName}}
+\def\category#1{%
+  \xdef\currentCategoryName{#1}
+}
+
+
 
 % Make the fancy header options.
-\setlength{\headheight}{20pt}
-\setlength{\headsep}{25pt}
+\setlength{\headheight}{30pt}
+\setlength{\headsep}{20pt}
+\setlength{\footskip}{20pt}
 \renewcommand{\headrulewidth}{0.5pt}
 \renewcommand{\footrulewidth}{0.5pt}
+\def\theHeadRuleWidth{0.85}
 
 \setlength{\tabcolsep}{5pt}  % More space in tables.
 \setlength{\parindent}{0pt}  % No indents on newline.
 
+% 15
+\def\cornerOrnament{63}
+\def\categoryOrnament{79}
+\def\theWidth{110pt}
+\backgroundsetup{
+    scale=1,
+    opacity=1,
+    angle=0,
+    color=black,
+    contents={%
+        \begin{tikzpicture}[every node/.style={inner sep=0pt}]
+            \node[anchor=north west](CNW)
+            at (current page.north west) {\pgfornament[width=\theWidth]{\cornerOrnament}};
+            \node[anchor=north east](CNE)
+            at (current page.north east) {\pgfornament[width=\theWidth,symmetry=v]{\cornerOrnament}};
+            \node[anchor=south west](CSW)
+            at (current page.south west) {\pgfornament[width=\theWidth,symmetry=h]{\cornerOrnament}};
+            \node[anchor=south east](CSE)
+            at (current page.south east) {\pgfornament[width=\theWidth,symmetry=c]{\cornerOrnament}};
+            %
+            \node[anchor=north west, xshift=3.7cm, yshift=-0.3cm](CNE)
+            at (current page.north west) {\pgfornament[scale=0.37]{\categoryOrnament}};
+            \node[anchor=north east, xshift=-3.7cm, yshift=-0.3cm](CNE)
+            at (current page.north east) {\pgfornament[symmetry=v, scale=0.37]{\categoryOrnament}};
+            %
+        \end{tikzpicture}%
+    }
+}
+
+\renewcommand\headrule{\makebox[\textwidth]{\rule{\theHeadRuleWidth\headwidth}{\headrulewidth}} \vskip-\headrulewidth}
+\renewcommand\footrule{\makebox[\textwidth]{\rule{\theHeadRuleWidth\headwidth}{\footrulewidth}} \vskip-\footrulewidth}
+
 
 \date{}
 
-% TODO: Auto balance the spacing such that two cocktails are on the same page.
 
+% TODO: Add a feature to print in oz / ml
 \def\ml#1{%
     \pgfmathsetmacro\result{#1 * 0.0333}%0.03814}%
     \pgfmathprintnumberto[precision=2]{\result}{\result}%
-    #1 ml (\result~oz.)%
+    #1 ml% (\result~oz.)%
 }
 \def\counter{1}
+\def\cocktailDivider{\rule{\textwidth}{0.5pt}}
 
 % #1 = name, #2 = ingredients (pgffor), #3 = Equipment (pgffor), #4 = Method (pgffor)
 \def\cocktail#1#2#3#4{
-    \vspace{15pt}
-    %
+    \smallskip
     \begin{center}
-    {\bf#1}
+    {\Large\bf#1}
     \end{center}
-    \textbf{Ingredients:}
-    \begin{itemize}
-        \foreach \x in {#2} {%
-            \item \x
-        }
-    \end{itemize}
+    \medskip
     %
-    \vspace{5pt}
-    \textbf{Equipment: }%
-    \foreach[count=\i] \x in {#3}{\ifnum\i=1\else, \fi\x}%
+    \fontsize{12}{16}\selectfont
+%    \textbf{Ingredients:}
+    \begin{minipage}[t]{0.49\textwidth}%
+        \vspace{0pt}
+        \begin{itemize}
+            \foreach \x in {#2} {%
+                \item \x
+            }
+        \end{itemize}
+    \end{minipage}
     %
-    \vspace*{7pt}%
-    \\%
-    \textbf{Method:}
-    \begin{enumerate}
-        \foreach \x in {#4} {%
-            \item \x
-        }
-    \end{enumerate}
-    %
-    \vspace{20pt}
-    \newpage
-}
+    \begin{minipage}[t]{0.49\textwidth}%
+        \vspace{0pt}
+        \begin{enumerate}
+            \foreach \x in {#4} {%
+                \item \x
+            }
+        \end{enumerate}
+    \end{minipage}
 
+    \bigskip
+    \begin{center}
+        \textsl{Tools: \foreach[count=\i] \x in {#3}{%
+            \ifnum%
+            \i=1\else%
+            , %
+            \fi\x}}%
+    \end{center}
+}
 
 \begin{document}
 
-%\cocktail{Tipperary}{
-%    \ml{60} Single pot still Irish whiskey,
-%    \ml{20} Sweet Vermouth,
-%    \ml{10} Green Chartreuse,
-%    2 Dashes orange bitters
-%}
-%%
-%{jigger, mixing glass, julep strainer, chilled coupe glass}
-%%
-%{
-%    Prepare your lemon twist.,
-%    Add all of your ingredients to your mixing glass and fill with ice.,
-%    Stir with barspoon by placing the back of the spoon against the inside of the glass and pushing the ice around until chilled and diluted.
-%}
-%
-%
-%\cocktail{Rum Monte Sour}{
-%    \ml{45} Amaro Montenegro,
-%    \ml{15} Dark rum,
-%    \ml{30} Lemon juice,
-%    \ml{5} Sugar syrup,
-%    10-\ml{15} Egg white,
-%    Orange twist to garnish
-%}
-%%
-%{jigger, shaker tins, hawthorn strainer, fine strainer, rocks glass, large ice block}
-%%
-%{
-%    {Add all ingredients to shaker tins, dry shake (without ice) to emulsify -- hold tins tightly!},
-%    {Add ice and shake again, then double strain over good ice in to your rocks glass}
-%    (using the hawthorn strainer and fine strainer).,
-%    {Fold twist over the top of the drink to expel the oils, then arrange in glass to garnish.}
-%}
+\subfile{cocktail-categories/classics.tex}
+\clearpage
 
-    \cocktail{Treacle}{
-        \ml{60} Dark rum,
-        \ml{10} Demerara sugar syrup,
-        \ml{15} Cloudy apple juice,
-        2 Dashes black walnut bitters,
-        Orange twist to garnish
-    }
-%
-    {jigger, mixing glass, barspoon, julep strainer, rocks glass, big block of ice}
-%
-    {
-        Prep your orange twist.,
-            {Add all ingredients except the apple juice to the mixing glass, add plenty of ice
-        and stir until chilled and diluted.},
-        Strain over a big block of ice and float the apple juice on top.,
-        Give orange twist a sharp fold over the top to expel oils and drop in to garnish.}
+\subfile{cocktail-categories/serene-spirits.tex}
+\clearpage
+
+\subfile{cocktail-categories/tropical-vibes.tex}
+\clearpage
+
+\subfile{cocktail-categories/fresh-and-fruity.tex}
+
+
 
 %\cocktail{Scofflaw}{
 %    \ml{50} Rye whiskey,
@@ -202,25 +223,25 @@
 %}
 
 
-    \cocktail{Mai Thai}{
-        \ml{60} Dark rum,
-        \ml{25} Fresh lime juice,
-        \ml{15} Triple sec or curacao,
-        \ml{10} Orgeat syrup,
-        5--\ml{10} Rich demerara sugar syrup,
-        Spent lime husk,
-        Mint sprig to garnish
-    }
-%
-    {jigger, shaker tins, rocks glass (for tiki spirit!), straw}
-%
-    {
-            {Squeeze your lime juice, keeping one of the half husks.},
-            {Add all of the ingredients except the mint into shaker tin.},
-            {Fill your tin with ice, seal and shake as hard as you can.},
-            {I like to serve this drink as a \enquote{shake and dump}, that is with no strainers. It is a no fuss beach drink, after all!},
-            {Garnish to look like a tropical island, and enjoy! }
-    }
+%    \cocktail{Mai Thai}{
+%        \ml{60} Dark rum,
+%        \ml{25} Fresh lime juice,
+%        \ml{15} Triple sec or curacao,
+%        \ml{10} Orgeat syrup,
+%        5--\ml{10} Rich demerara sugar syrup,
+%        Spent lime husk,
+%        Mint sprig to garnish
+%    }
+%%
+%    {jigger, shaker tins, rocks glass (for tiki spirit!), straw}
+%%
+%    {
+%            {Squeeze your lime juice, keeping one of the half husks.},
+%            {Add all of the ingredients except the mint into shaker tin.},
+%            {Fill your tin with ice, seal and shake as hard as you can.},
+%            {I like to serve this drink as a \enquote{shake and dump}, that is with no strainers. It is a no fuss beach drink, after all!},
+%            {Garnish to look like a tropical island, and enjoy! }
+%    }
 
 %\cocktail{ZOMBIE}{
 %    \ml{25} Dark Rum,
@@ -242,24 +263,7 @@
 %    Garnish with mint sprig \& orange slice.
 %}
 %
-%\cocktail{Negroni}{
-%    \ml{30} London Dry gin,
-%    \ml{30} Sweet vermouth,
-%    \ml{30} Campari,
-%    Orange twist to garnish,
-%    Good ice
-%}
-%%
-%{rocks glass, mixing glass, jigger, barspoon, julep strainer}
-%%
-%{
-%    {Prep twist.},
-%    {Add all of the ingredients to the mixing glass, fill with as much ice as possible.},
-%    {Stir until desired dilution.},
-%    {Strain over good quality ice.},
-%    {Squeeze the orange twist to expel the citrus oil over the drink, add the twist to
-%    drink.}
-%}
+
 %
 %\cocktail{London Calling}{
 %    \ml{40} London Dry gin (Navy Strength if you can find it),
@@ -280,39 +284,39 @@
 %    Squeeze the grapefruit twist to expel the citrus oil over the drink then add the twist to the drink.
 %}
 
-    \cocktail{1934 Cosmopolitan Cocktail}{
-        \ml{60} Gin,
-        \ml{15} Cointreau,
-        \ml{25} Lemon Juice,
-        \ml{10} Raspberry Syrup,
-        2 dashes of orange bitters
-    }
-%
-    {jigger, shaker tins, fine strainer, chilled coupe glass}
-%
-    {
-        Shake all ingredients with ice.,
-        Fine strain into chilled coupe glass.
-    }
+%    \cocktail{1934 Cosmopolitan Cocktail}{
+%        \ml{60} Gin,
+%        \ml{15} Cointreau,
+%        \ml{25} Lemon Juice,
+%        \ml{10} Raspberry Syrup,
+%        2 dashes of orange bitters
+%    }
+%%
+%    {jigger, shaker tins, fine strainer, chilled coupe glass}
+%%
+%    {
+%        Shake all ingredients with ice.,
+%        Fine strain into chilled coupe glass.
+%    }
 
-    \cocktail{Saturn}{
-            {\ml{40} Gin},
-            {\ml{15} Lemon juice, freshly squeezed},
-            {\ml{15} Passion fruit syrup},
-            {\ml{7} Falernum},
-            {\ml{7} Orgeat syrup},
-            {Garnish: Edible flower},
-            {Garnish: Orange twist}
-    }
-%
-    {blender (alternatively shaker tins), crushed ice, jigger, highball glass}
-%
-    {
-        Add all (non-garnish) ingredients to a blender (or shaker) with crushed ice.,
-        Blend (or shake) a few seconds until smooth.,
-        Pour unstrained into a Tiki mug or highball glass.,
-        Garnish with an edible flower and an orange twist.
-    }
+%    \cocktail{Saturn}{
+%            {\ml{40} Gin},
+%            {\ml{15} Lemon juice, freshly squeezed},
+%            {\ml{15} Passion fruit syrup},
+%            {\ml{7} Falernum},
+%            {\ml{7} Orgeat syrup},
+%            {Garnish: Edible flower},
+%            {Garnish: Orange twist}
+%    }
+%%
+%    {blender (alternatively shaker tins), crushed ice, jigger, highball glass}
+%%
+%    {
+%        Add all (non-garnish) ingredients to a blender (or shaker) with crushed ice.,
+%        Blend (or shake) a few seconds until smooth.,
+%        Pour unstrained into a Tiki mug or highball glass.,
+%        Garnish with an edible flower and an orange twist.
+%    }
 
 %\cocktail{Sazerac}{
 %    \ml{60} Rye,
@@ -334,25 +338,6 @@
 %    {Serve your Sazerac with the absinthe on the side (if you like!).}
 %}
 %
-%\cocktail{Manhattan}{
-%    \ml{50} Rye whiskey,
-%    \ml{20} Sweet vermouth,
-%    2 Good dashes Angostura bitters,
-%    Orange twist,
-%    Good ice,
-%    Good quality cherry (e.g. Morello) to garnish
-%}
-%%
-%{chilled coupe glass, mixing glass, jigger, julep strainer, bar spoon}
-%%
-%{
-%    {Prep your twist (doesn’t have to be pretty, you will be discarding it).},
-%    {Add all ingredients to the mixing glass, fill with as much ice as possible.},
-%    {Stir until desired dilution.},
-%    {Strain into chilled coupe glass.},
-%    {Squeeze the orange twist to expel the citrus oil over the drink, then discard.},
-%    {Add your cherry to garnish, and enjoy!}
-%}
 %
 %\cocktail{Hemingway Daiquiri}{
 %    \ml{60} White rum,
@@ -391,51 +376,8 @@
 %    (Optional) Garnish with Maraschino cherry
 %}
 %
-%\cocktail{East India Negroni}{
-%    \ml{45} Dark rum,
-%    \ml{20} East India cream sherry,
-%    \ml{20} Campari,
-%    Orange twist to garnish
-%}
-%%
-%{jigger, mixing glass, barspoon, julep strainer, rocks glass, ice}
-%%
-%{
-%  Add all of the ingredients to your mixing glass.,
-%  Stir until it is chilled and diluted.,
-%  Strain over good ice.
-%  Squeeze your orange twist over the drink to expel the oils.,
-%  {Garnish, and enjoy!}
-%}
-%
-%\cocktail{Royal Bermuda Yacht Club}{
-%    \ml{50} Rum,
-%    \ml{20} Fresh lime juice,
-%    \ml{15} Falernum,
-%    \ml{5} Dry Curacao,
-%    Lime wheel to garnish
-%}
-%%
-%{jigger, shaker tins, hawthorn strainer, fine strainer, coupe glass}
-%%
-%{
-%  Add all of your ingredients to your shaker tins and fill full with ice.,
-%  Seal the tins together and shake as hard as you can.,
-%  Double strain into coupe glass.,
-%  {Garnish with lime wheel, and enjoy!}
-%}
 
-
-%\cocktail{}{
-%
-%}
-%%
-%{}
-%%
-%{
-%
 
 % TODO: Add Green Mamba
 
 \end{document}
-
