@@ -97,6 +97,7 @@
 \def\counter{1}
 \def\cocktailDivider{\rule{\textwidth}{0.5pt}}
 
+\def \ifempty#1{\def\temp{#1} \ifx\temp\empty }
 % #1 = name, #2 = ingredients (pgffor), #3 = Equipment (pgffor), #4 = Method (pgffor)
 \def\cocktail#1#2#3#4{
     \smallskip
@@ -125,7 +126,9 @@
         \end{enumerate}
     \end{minipage}
 
-    \bigskip
+    \ifempty{#3}
+    \else
+    \medskip
     \begin{center}
         \textsl{Tools: \foreach[count=\i] \x in {#3}{%
             \ifnum%
@@ -133,6 +136,7 @@
             , %
             \fi\x}}%
     \end{center}
+    \fi
 }
 
 \begin{document}
@@ -204,25 +208,6 @@
 %}
 
 
-%    \cocktail{Mai Thai}{
-%        \ml{60} Dark rum,
-%        \ml{25} Fresh lime juice,
-%        \ml{15} Triple sec or curacao,
-%        \ml{10} Orgeat syrup,
-%        5--\ml{10} Rich demerara sugar syrup,
-%        Spent lime husk,
-%        Mint sprig to garnish
-%    }
-%%
-%    {jigger, shaker tins, rocks glass (for tiki spirit!), straw}
-%%
-%    {
-%            {Squeeze your lime juice, keeping one of the half husks.},
-%            {Add all of the ingredients except the mint into shaker tin.},
-%            {Fill your tin with ice, seal and shake as hard as you can.},
-%            {I like to serve this drink as a \enquote{shake and dump}, that is with no strainers. It is a no fuss beach drink, after all!},
-%            {Garnish to look like a tropical island, and enjoy! }
-%    }
 
 %\cocktail{ZOMBIE}{
 %    \ml{25} Dark Rum,
@@ -280,24 +265,6 @@
 %        Fine strain into chilled coupe glass.
 %    }
 
-%    \cocktail{Saturn}{
-%            {\ml{40} Gin},
-%            {\ml{15} Lemon juice, freshly squeezed},
-%            {\ml{15} Passion fruit syrup},
-%            {\ml{7} Falernum},
-%            {\ml{7} Orgeat syrup},
-%            {Garnish: Edible flower},
-%            {Garnish: Orange twist}
-%    }
-%%
-%    {blender (alternatively shaker tins), crushed ice, jigger, highball glass}
-%%
-%    {
-%        Add all (non-garnish) ingredients to a blender (or shaker) with crushed ice.,
-%        Blend (or shake) a few seconds until smooth.,
-%        Pour unstrained into a Tiki mug or highball glass.,
-%        Garnish with an edible flower and an orange twist.
-%    }
 
 %\cocktail{Sazerac}{
 %    \ml{60} Rye,
