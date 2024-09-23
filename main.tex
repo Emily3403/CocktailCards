@@ -21,6 +21,7 @@
 \RequirePackage{background}         % in the background!
 \RequirePackage{booktabs}
 \RequirePackage{pgffor}
+\RequirePackage[scale=1.05]{caladea}
 \RequirePackage{hyperref}           % Make the links colorful!
 
 \geometry{a4paper, total={17cm,24cm}}
@@ -36,17 +37,16 @@
 
 \fancyhead[c]{\LARGE \textsc{\currentCategoryName}}
 \def\category#1{%
-  \xdef\currentCategoryName{#1}
+    \xdef\currentCategoryName{#1}
 }
-
 
 
 % Make the fancy header options.
 \setlength{\headheight}{30pt}
 \setlength{\headsep}{20pt}
 \setlength{\footskip}{20pt}
-\renewcommand{\headrulewidth}{0.5pt}
-\renewcommand{\footrulewidth}{0.5pt}
+\renewcommand{\headrulewidth}{1pt}
+\renewcommand{\footrulewidth}{0pt}
 \def\theHeadRuleWidth{0.85}
 
 \setlength{\tabcolsep}{5pt}  % More space in tables.
@@ -61,6 +61,7 @@
     opacity=1,
     angle=0,
     color=black,
+    pages=some,
     contents={%
         \begin{tikzpicture}[every node/.style={inner sep=0pt}]
             \node[anchor=north west](CNW)
@@ -86,7 +87,8 @@
 
 
 \date{}
-
+\def\counter{1}
+\def\cocktailDivider{\rule{\textwidth}{0.5pt}}
 
 % TODO: Add a feature to print in oz / ml
 \def\ml#1{%
@@ -94,17 +96,22 @@
     \pgfmathprintnumberto[precision=2]{\result}{\result}%
     #1 ml% (\result~oz.)%
 }
-\def\counter{1}
-\def\cocktailDivider{\rule{\textwidth}{0.5pt}}
+
+\def\hint#1{%
+    \begin{center}%
+        \textit{Hint}: #1%
+    \end{center}%
+}
 
 \def \ifempty#1{\def\temp{#1} \ifx\temp\empty }
-% #1 = name, #2 = ingredients (pgffor), #3 = Equipment (pgffor), #4 = Method (pgffor)
+
+% #1 = name, #2 = ingredients (pgffor), #3 = Method (pgffor), #4 = Equipment (pgffor)
 \def\cocktail#1#2#3#4{
     \smallskip
     \begin{center}
     {\Large\bf#1}
     \end{center}
-    \medskip
+    \vspace{-3pt}
     %
     \fontsize{12}{16}\selectfont
 %    \textbf{Ingredients:}
@@ -120,50 +127,36 @@
     \begin{minipage}[t]{0.49\textwidth}%
         \vspace{0pt}
         \begin{enumerate}
-            \foreach \x in {#4} {%
+            \foreach \x in {#3} {%
                 \item \x
             }
         \end{enumerate}
     \end{minipage}
-
-    \ifempty{#3}
-    \else
-    \medskip
-    \begin{center}
-        \textsl{Tools: \foreach[count=\i] \x in {#3}{%
-            \ifnum%
-            \i=1\else%
-            , %
-            \fi\x}}%
-    \end{center}
+    %
+    \if
+        \relax\detokenize{#4}\relax\else
+        \vspace{5pt}
+        \begin{center}
+            \textsl{Tools: \foreach[count=\i] \x in {#4}{%
+                \ifnum%
+                    \i=1\else%
+                    , %
+                \fi\x}}%
+        \end{center}
     \fi
 }
 
 \begin{document}
 
-\subfile{cocktail-categories/tropical-vibes.tex}
-\clearpage
+% Each subfile must define \clearpage for themselves
 
-\subfile{cocktail-categories/fresh-and-fruity.tex}
-\clearpage
-
-\subfile{cocktail-categories/sours.tex}
-\clearpage
-
-\subfile{cocktail-categories/enlivening-experiences.tex}
-\clearpage
-
-\subfile{cocktail-categories/fire-and-smoke.tex}
-\clearpage
-
-\subfile{cocktail-categories/serene-spirits.tex}
-\clearpage
-
-\subfile{cocktail-categories/highballing.tex}
-\clearpage
-
-%
-%
+    \subfile{cocktail-categories/01-tropical-vibes.tex}
+    \subfile{cocktail-categories/02-fresh-and-fruity.tex}
+    \subfile{cocktail-categories/03-sours.tex}
+    \subfile{cocktail-categories/04-enlivening-experiences.tex}
+    \subfile{cocktail-categories/05-fire-and-smoke.tex}
+    \subfile{cocktail-categories/06-serene-spirits.tex}
+    \subfile{cocktail-categories/07-highballing.tex}
 
 
 % TODO: Add Green Mamba
